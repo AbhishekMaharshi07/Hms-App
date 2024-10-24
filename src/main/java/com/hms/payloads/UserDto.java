@@ -1,0 +1,24 @@
+package com.hms.payloads;
+
+
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class UserDto {
+
+    private Long id;
+
+    private String name;
+
+    @NotEmpty
+    private String username;
+
+    @Email
+    private String email;
+
+    private String password;
+}
