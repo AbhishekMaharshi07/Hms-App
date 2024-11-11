@@ -12,6 +12,7 @@ public class HmsApplication {
 		SpringApplication.run(HmsApplication.class, args);
 	}
 
+
 	@Bean
 	public ModelMapper getModelMapper(){
 		return new ModelMapper();

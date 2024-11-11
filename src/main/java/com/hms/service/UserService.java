@@ -26,13 +26,6 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-//    public UserDto createUser(UserDto userDto) {
-//
-//        AppUser appUser = mapToEntity(userDto);
-//        AppUser saved = appUserRepository.save(appUser);
-//
-//        UserDto dto = mapToDto(saved);
-//        return dto;
 
     public ResponseEntity<?> createUser(UserDto userDto) {
         Optional<AppUser> opUser = appUserRepository.findByUsername(userDto.getUsername());

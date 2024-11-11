@@ -33,25 +33,34 @@ public class UserController {
         this.jwtService = jwtService;
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/signup-user")
     public ResponseEntity<?> createUser(
-           @Valid @RequestBody UserDto userDto
+            @Valid @RequestBody UserDto userDto
     ){
 
-//        Optional<AppUser> opUser = appUserRepository.findByUsername(userDto.getUsername());
-//        if (opUser.isPresent()) {
-//            return new ResponseEntity<>("Username is already exits!!", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//        Optional<AppUser> opEmail = appUserRepository.findByEmail(userDto.getEmail());
-//        if (opEmail.isPresent()) {
-//            return new ResponseEntity<>("Email_id is already exits!!", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
         String encryptedPassword = BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt(5));
         userDto.setPassword(encryptedPassword);
+        userDto.setRole("ROLE_USER");
         ResponseEntity<?> user = userService.createUser(userDto);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
 
     }
+
+
+    @PostMapping("/signup-property-owner")
+    public ResponseEntity<?> createPropertyOwnerUser(
+           @Valid @RequestBody UserDto userDto
+    ){
+
+        String encryptedPassword = BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt(5));
+        userDto.setPassword(encryptedPassword);
+        userDto.setRole("ROLE_OWNER");
+        ResponseEntity<?> user = userService.createUser(userDto);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
+
+    }
+
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(
