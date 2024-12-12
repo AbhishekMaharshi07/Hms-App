@@ -25,12 +25,25 @@ public class PropertyController {
     @PostMapping("/add_property")
     public ResponseEntity<?> addProperty(
             @RequestBody PropertyDto propertyDto,
-            @RequestParam long country_id,
-            @RequestParam long city_id
+            @RequestParam Long country_id,
+            @RequestParam Long city_id,
+            @RequestParam Long location_id
     ) {
-        ResponseEntity<?> property1 = propertyService.addProperty(propertyDto, country_id, city_id);
-        return new ResponseEntity<>(property1, HttpStatus.CREATED);
-
+//        try {
+//        ResponseEntity<?> property1 = propertyService.addProperty(
+//                propertyDto, country_id, city_id, location_id);
+//        return new ResponseEntity<>(property1, HttpStatus.CREATED);
+//
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//     }
+        Optional<Property> byName = propertyRepository.findByName(propertyDto.getName());
+        if(byName.isPresent()){
+            return new ResponseEntity<>("Property already exists", HttpStatus.NOT_ACCEPTABLE);
+        }else{
+            propertyService.addProperty(propertyDto, country_id, city_id, location_id);
+            return new ResponseEntity<>("Property successfully added", HttpStatus.CREATED);
+        }
     }
 
     @GetMapping("/getAllProperty")
@@ -74,6 +87,14 @@ public class PropertyController {
         }else{
             return new ResponseEntity<>("Property not found", HttpStatus.NOT_FOUND);
         }
+
+    }
+
+    @GetMapping("/search-hotles")
+    public List<Property> searchHotels(
+            @RequestParam String name){
+        List<Property> properties = propertyRepository.searchHotels(name);
+        return properties;
 
     }
 

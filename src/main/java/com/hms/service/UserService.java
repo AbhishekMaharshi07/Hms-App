@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,22 +26,41 @@ public class UserService {
     }
 
 
-    public ResponseEntity<?> createUser(UserDto userDto) {
+    public UserDto createUser(UserDto userDto) {
         Optional<AppUser> opUser = appUserRepository.findByUsername(userDto.getUsername());
         if (opUser.isPresent()) {
-            return new ResponseEntity<>("Username is already exits!!", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new IllegalArgumentException("Username is already in use!");
         }
         Optional<AppUser> opEmail = appUserRepository.findByEmail(userDto.getEmail());
         if (opEmail.isPresent()) {
-            return new ResponseEntity<>("Email_id is already exits!!", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new IllegalArgumentException("Email is already in use!");
         }
+        String encryptedPassword = BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt(5));
+        userDto.setPassword(encryptedPassword);
         AppUser appUser = mapToEntity(userDto);
         AppUser saved = appUserRepository.save(appUser);
 
         UserDto dto = mapToDto(saved);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return dto;
 
 
+    }
+
+    public String verifyLogin(LoginDto dto){
+        Optional<AppUser> opUser = appUserRepository.findByUsername(dto.getUsername());
+        if (opUser.isPresent()){
+            AppUser appUser = opUser.get();
+           if (BCrypt.checkpw(dto.getPassword(), appUser.getPassword())){
+               //(plain text encrypted password, database encrypted password)
+               //checkpw is a method that comes from spring security BCrypt Class.
+               // Generate token
+               String token = jwtService.generateToken(appUser.getUsername());
+               return token;
+           }else {
+               return null;
+           }
+        }
+        return null;
     }
 
     AppUser mapToEntity(UserDto userDto) {
@@ -53,20 +71,5 @@ public class UserService {
     UserDto mapToDto(AppUser appUser) {
         UserDto mapUserDto = modelMapper.map(appUser, UserDto.class);
         return mapUserDto;
-    }
-
-    public String verifyLogin(LoginDto dto){
-        Optional<AppUser> opUser = appUserRepository.findByUsername(dto.getUsername());
-        if (opUser.isPresent()){
-            AppUser appUser = opUser.get();
-           if (BCrypt.checkpw(dto.getPassword(), appUser.getPassword())){
-               // Generate token
-               String token = jwtService.generateToken(appUser.getUsername());
-               return token;
-           }
-        }else {
-            return null;
-        }
-        return null;
     }
 }

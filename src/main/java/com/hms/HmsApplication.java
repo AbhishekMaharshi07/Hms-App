@@ -14,6 +14,7 @@ public class HmsApplication {
 
 
 	@Bean
+	@SuppressWarnings("unused")
 	public ModelMapper getModelMapper(){
 		return new ModelMapper();
 	}

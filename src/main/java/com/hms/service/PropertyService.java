@@ -2,10 +2,12 @@ package com.hms.service;
 
 import com.hms.entity.City;
 import com.hms.entity.Country;
+import com.hms.entity.Location;
 import com.hms.entity.Property;
 import com.hms.payloads.PropertyDto;
 import com.hms.repository.CityRepository;
 import com.hms.repository.CountryRepository;
+import com.hms.repository.LocationRepository;
 import com.hms.repository.PropertyRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -21,23 +23,35 @@ public class PropertyService {
     private CountryRepository countryRepository;
     private CityRepository cityRepository;
     private ModelMapper modelMapper;
+    private final LocationRepository locationRepository;
 
-    public PropertyService(PropertyRepository propertyRepository, CountryRepository countryRepository, CityRepository cityRepository, ModelMapper modelMapper) {
+    public PropertyService(PropertyRepository propertyRepository, CountryRepository countryRepository, CityRepository cityRepository, ModelMapper modelMapper,
+                           LocationRepository locationRepository) {
         this.propertyRepository = propertyRepository;
         this.countryRepository = countryRepository;
         this.cityRepository = cityRepository;
         this.modelMapper = modelMapper;
+        this.locationRepository = locationRepository;
     }
 
-    public ResponseEntity<?> addProperty(PropertyDto propertyDto, long countryId, long cityId) {
-        Optional<Property> byName = propertyRepository.findByName(propertyDto.getName());
-        if (byName.isPresent()) {
-            return new ResponseEntity<>("Property already exists", HttpStatus.NOT_ACCEPTABLE);
-        }
-        Property property = mapToEntity(propertyDto);
-        Property saved = propertyRepository.save(property);
+    public ResponseEntity<?> addProperty(
+            PropertyDto propertyDto, Long location_id, Long country_id,Long city_id) {
 
-        PropertyDto dto = mapToDto(saved);
+        Location location = locationRepository.findById(location_id).orElseThrow(
+                () -> new RuntimeException("Services is not available for your country"));
+        City city = cityRepository.findById(city_id).orElseThrow(
+                () -> new RuntimeException("Services is not available for your country"));
+        Country country = countryRepository.findById(country_id).orElseThrow(
+                () -> new RuntimeException("Services is not available for your country"));
+
+
+        Property property = mapToEntity(propertyDto);
+        property.setCountry(country);
+        property.setCity(city);
+        property.setLocation(location);
+
+        Property save = propertyRepository.save(property);
+        PropertyDto dto = mapToDto(save);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

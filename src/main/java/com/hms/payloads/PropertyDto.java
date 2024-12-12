@@ -1,5 +1,8 @@
 package com.hms.payloads;
 
+import com.hms.entity.City;
+import com.hms.entity.Country;
+import com.hms.entity.Location;
 import lombok.Data;
 
 @Data
@@ -17,10 +20,13 @@ public class PropertyDto {
 
     private Integer no_of_beds;
 
-    private String country_name;
+    private Location location;
+    private Long location_id;
+
+    private Country country;
     private Long country_id;
 
-    private String city_name;
+    private City city;
     private Long city_id;
 
 

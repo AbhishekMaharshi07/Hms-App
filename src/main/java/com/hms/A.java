@@ -1,9 +1,10 @@
 package com.hms;
 
-import org.springframework.security.crypto.bcrypt.BCrypt;
+import java.util.TreeSet;
 
-public class A {
-    public static void main(String[] args) {
-        System.out.println(BCrypt.hashpw("testing", BCrypt.gensalt(5)));
+class A{
+    public static void main(String[] args){
 
-}}
+
+    }
+}

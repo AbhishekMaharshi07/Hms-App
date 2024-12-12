@@ -14,7 +14,7 @@ public class AppUser {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false, unique = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "username", nullable = false, unique = true)
@@ -23,7 +23,7 @@ public class AppUser {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 1000)
+    @Column(name = "password", nullable = false, length = 500)
     private String password;
 
     @Column(name = "role", length = 20)

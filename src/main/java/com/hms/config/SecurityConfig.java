@@ -8,6 +8,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 
 @Configuration
+// @Configuration files has to be load first in the project. Before any classes.
 public class SecurityConfig {
 
     private JWTFilter jwtFilter;
@@ -18,12 +19,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
+            HttpSecurity http  // all the HTTP request(GET, POST etc.) will be captured by http.
     ) throws Exception{
 
 
         http.csrf().disable().cors().disable();
+// Cross Site Request Forgery Protection--> In Spring Security,It is a security feature enabled by
+// default to prevent unauthorized commands from being transmitted from a user that the web application
+// trusts.
 
+//      this line of code will help to run jwtFilter method to run before and built in filter method.
+//      so  url's should be access with the JWT authentication.
         http.addFilterBefore(jwtFilter, AuthorizationFilter.class);
 
 //      Here we permit all url to access without authentication.

@@ -1,67 +1,69 @@
 package com.hms.controller;
 
-import com.hms.entity.AppUser;
 import com.hms.payloads.LoginDto;
 import com.hms.payloads.TokenDto;
 import com.hms.payloads.UserDto;
 import com.hms.repository.AppUserRepository;
 import com.hms.service.JWTService;
+import com.hms.service.OTPService;
 import com.hms.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
 
     private UserService userService;
-    private  AppUserRepository appUserRepository;
     private JWTService jwtService;
+    private OTPService otpService;
 
     public UserController(UserService userService,
-                          AppUserRepository appUserRepository, JWTService jwtService) {
+                          AppUserRepository appUserRepository, JWTService jwtService, OTPService otpService) {
         this.userService = userService;
-        this.appUserRepository = appUserRepository;
         this.jwtService = jwtService;
+        this.otpService = otpService;
     }
 
+    //http://localhost:8080/api/v1/users/signup-user
     @PostMapping("/signup-user")
     public ResponseEntity<?> createUser(
             @Valid @RequestBody UserDto userDto
     ){
 
-        String encryptedPassword = BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt(5));
-        userDto.setPassword(encryptedPassword);
-        userDto.setRole("ROLE_USER");
-        ResponseEntity<?> user = userService.createUser(userDto);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        try {
+            userDto.setRole("ROLE_USER");
+            UserDto createdUser = userService.createUser(userDto);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(
+                    "An error occurred while creating the user.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 
-
-    @PostMapping("/signup-property-owner")
+    //http://localhost:8080/api/v1/users/signup-propertyOwner
+    @PostMapping("/signup-propertyOwner")
     public ResponseEntity<?> createPropertyOwnerUser(
            @Valid @RequestBody UserDto userDto
-    ){
-
-        String encryptedPassword = BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt(5));
-        userDto.setPassword(encryptedPassword);
-        userDto.setRole("ROLE_OWNER");
-        ResponseEntity<?> user = userService.createUser(userDto);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
-
+    ) {
+        try {
+            userDto.setRole("ROLE_OWNER");
+            UserDto createdUser = userService.createUser(userDto);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(
+                    "An error occurred while creating the user.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-
-
-
+    //http://localhost:8080/api/v1/users/login
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @RequestBody LoginDto dto
@@ -76,4 +78,10 @@ public class UserController {
             return new ResponseEntity<>("Invalid Username/Password!!", HttpStatus.FORBIDDEN);
         }
     }
+
+//    @PostMapping("/login-otp")
+//    public String login(@RequestParam String mobileNumber){
+//        //Generate OTP and send via SMS
+//        return otpService.generateAndSendOTP(mobileNumber);
+//    }
 }

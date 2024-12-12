@@ -29,12 +29,19 @@ public class Property {
     @Column(name = "no_of_beds", nullable = false)
     private Integer no_of_beds;
 
-    @ManyToOne
-    @JoinColumn(name = "country_id")
-    private Country country;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_id")
+    private Location location;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "city_id")
     private City city;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "country_id")
+    private Country country;
+
+
+
 }
+// Learn about cascade and @Transactional

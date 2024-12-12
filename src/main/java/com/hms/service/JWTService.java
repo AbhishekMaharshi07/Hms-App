@@ -14,6 +14,7 @@ import java.util.Date;
 @Service
 public class JWTService {
 
+    // @Value annotation fetches the values from the application.properties file.
     @Value("${jwt.algorithm.key}")
     private String algorithmKey;
 
@@ -22,10 +23,11 @@ public class JWTService {
 
     @Value("${jwt.expiry.duration}")
     private int expiryTime;
-
+//  this comes from the JWT.
     private Algorithm algorithm;
 
-//    This method is capable of running itself without calling it.
+//  @PostConstruct -  This method is capable of running itself without calling it. this annotation
+//                    comes from Hibernate. it will run when project is started.
     @PostConstruct
     public void postConstruct() throws UnsupportedEncodingException {
         algorithm = Algorithm.HMAC256(algorithmKey);
