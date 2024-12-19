@@ -31,7 +31,7 @@ public class CountryController {
 
     //ADD COUNTRY
     @PostMapping("/addCountry")
-    public ResponseEntity<?> addCity(@RequestBody CountryDto countryDto){
+    public ResponseEntity<?> addCountry(@RequestBody CountryDto countryDto){
         Optional<Country> byName = countryRepository.findByName(countryDto.getName());
         if(byName.isPresent()){
             return new ResponseEntity<>("Country already exits", HttpStatus.NOT_ACCEPTABLE);

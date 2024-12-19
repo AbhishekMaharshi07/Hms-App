@@ -35,6 +35,7 @@ public class UserService {
         }
         String encryptedPassword = BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt(5));
         userDto.setPassword(encryptedPassword);
+
         AppUser appUser = mapToEntity(userDto);
         AppUser saved = appUserRepository.save(appUser);
 
@@ -44,22 +45,44 @@ public class UserService {
 
     }
 
-    public String verifyLogin(LoginDto dto){
+    public String verifyLogin(LoginDto dto) {
         Optional<AppUser> opUser = appUserRepository.findByUsername(dto.getUsername());
-        if (opUser.isPresent()){
+        if (opUser.isPresent()) {
             AppUser appUser = opUser.get();
-           if (BCrypt.checkpw(dto.getPassword(), appUser.getPassword())){
-               //(plain text encrypted password, database encrypted password)
-               //checkpw is a method that comes from spring security BCrypt Class.
-               // Generate token
-               String token = jwtService.generateToken(appUser.getUsername());
-               return token;
-           }else {
-               return null;
-           }
+            if (BCrypt.checkpw(dto.getPassword(), appUser.getPassword())) {
+                //(plain text encrypted password, database encrypted password)
+                //checkpw is a method that comes from spring security BCrypt Class.
+                // Generate token
+                String token = jwtService.generateToken(appUser.getUsername());
+                return token;
+            } else {
+                return null;
+            }
         }
         return null;
     }
+
+
+    public UserDto updateUser(long id, UserDto userDto) {
+        Optional<AppUser> byId = appUserRepository.findById(id);
+        if (byId.isPresent()) {
+            String encryptedPassword = BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt(5));
+            userDto.setPassword(encryptedPassword);
+            userDto.setId(id);
+            AppUser updated = mapToEntity(userDto);
+            AppUser save = appUserRepository.save(updated);
+            UserDto updateDto = mapToDto(save);
+            return updateDto;
+        } else {
+            throw new IllegalArgumentException("User Not Exits!");
+        }
+
+    }
+
+    public void deleteUser(Long id) {
+        appUserRepository.deleteById(id);
+    }
+
 
     AppUser mapToEntity(UserDto userDto) {
         AppUser mapAppUser = modelMapper.map(userDto, AppUser.class);

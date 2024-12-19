@@ -5,6 +5,7 @@ import com.hms.entity.Property;
 import com.hms.entity.Review;
 import com.hms.repository.PropertyRepository;
 import com.hms.repository.ReviewRepository;
+import com.hms.service.ReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,10 +17,12 @@ import java.util.List;
 @RequestMapping("/api/v1/review")
 public class ReviewController {
     private PropertyRepository propertyRepository;
+    private ReviewService reviewService;
     private ReviewRepository reviewRepository;
 
-    public ReviewController(PropertyRepository propertyRepository, ReviewRepository reviewRepository) {
+    public ReviewController(PropertyRepository propertyRepository, ReviewService reviewService, ReviewRepository reviewRepository) {
         this.propertyRepository = propertyRepository;
+        this.reviewService = reviewService;
         this.reviewRepository = reviewRepository;
     }
 
@@ -27,19 +30,16 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<?> writeReview(@RequestBody Review review,
                                               @RequestParam long propertyId,
-                                              @AuthenticationPrincipal AppUser user) {
-        Property property = propertyRepository.findById(propertyId).get();
-        if(reviewRepository.existsByAppUserAndProperty
-                (user, property)){
-            return new ResponseEntity("Review already exists for this property", HttpStatus.CONFLICT);
+                                              @AuthenticationPrincipal AppUser user)
+    {
+        try {
+            Review savedReview = reviewService.writeReview(review, propertyId, user);
+
+            return new ResponseEntity<>(savedReview, HttpStatus.OK);
+
+        }catch (IllegalArgumentException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        review.setProperty(property);
-        review.setAppUser(user);
-
-        Review savedReview = reviewRepository.save(review);
-
-        return new ResponseEntity<>(savedReview, HttpStatus.OK);
-
 
     }
 

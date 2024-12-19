@@ -25,24 +25,15 @@ public class PropertyController {
     @PostMapping("/add_property")
     public ResponseEntity<?> addProperty(
             @RequestBody PropertyDto propertyDto,
-            @RequestParam Long country_id,
-            @RequestParam Long city_id,
-            @RequestParam Long location_id
+            @RequestParam long locationId,
+            @RequestParam long cityId,
+            @RequestParam long countryId
     ) {
-//        try {
-//        ResponseEntity<?> property1 = propertyService.addProperty(
-//                propertyDto, country_id, city_id, location_id);
-//        return new ResponseEntity<>(property1, HttpStatus.CREATED);
-//
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//     }
-        Optional<Property> byName = propertyRepository.findByName(propertyDto.getName());
-        if(byName.isPresent()){
-            return new ResponseEntity<>("Property already exists", HttpStatus.NOT_ACCEPTABLE);
-        }else{
-            propertyService.addProperty(propertyDto, country_id, city_id, location_id);
-            return new ResponseEntity<>("Property successfully added", HttpStatus.CREATED);
+        try {
+            PropertyDto propertyAdded = propertyService.addProperty(propertyDto, locationId, cityId, countryId);
+            return new ResponseEntity<>(propertyAdded, HttpStatus.CREATED);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -59,40 +50,40 @@ public class PropertyController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePropertyById(@PathVariable("id") long property_id) {
         Optional<Property> byId = propertyRepository.findById(property_id);
-        if(byId.isPresent()){
+        if (byId.isPresent()) {
             propertyService.deletePropertyById(property_id);
             return new ResponseEntity<>("Property deleted successfully", HttpStatus.OK);
-        }else{
-            return  new ResponseEntity<>("Property not found", HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>("Property not found", HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping("/getPropertyById/{id}")
-    public ResponseEntity<?> getPropertyById(@PathVariable("id") long property_id){
+    public ResponseEntity<?> getPropertyById(@PathVariable("id") long property_id) {
         Optional<Property> byId = propertyService.getPropertyById(property_id);
-        if(byId.isPresent()){
+        if (byId.isPresent()) {
             Property property = byId.get();
             return new ResponseEntity<>(property, HttpStatus.OK);
-        }else{
+        } else {
             return new ResponseEntity<>("Property not found", HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("updatePropertyById/{id}")
     public ResponseEntity<?> updatePropertyById(@PathVariable("id") long property_id,
-                                                @RequestBody PropertyDto propertyDto){
+                                                @RequestBody PropertyDto propertyDto) {
         boolean status = propertyService.updatePropertyById(property_id, propertyDto);
-        if(status){
+        if (status) {
             return new ResponseEntity<>("Property updated successfully", HttpStatus.OK);
-        }else{
+        } else {
             return new ResponseEntity<>("Property not found", HttpStatus.NOT_FOUND);
         }
 
     }
 
-    @GetMapping("/search-hotles")
+    @GetMapping("/search-hotels")
     public List<Property> searchHotels(
-            @RequestParam String name){
+            @RequestParam String name) {
         List<Property> properties = propertyRepository.searchHotels(name);
         return properties;
 

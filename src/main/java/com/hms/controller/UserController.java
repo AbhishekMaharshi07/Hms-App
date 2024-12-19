@@ -1,5 +1,6 @@
 package com.hms.controller;
 
+import com.hms.entity.AppUser;
 import com.hms.payloads.LoginDto;
 import com.hms.payloads.TokenDto;
 import com.hms.payloads.UserDto;
@@ -10,6 +11,7 @@ import com.hms.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -62,6 +64,45 @@ public class UserController {
                     "An error occurred while creating the user.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PutMapping("/appUser/{id}")
+    public ResponseEntity<?> updateAppUser(
+            @PathVariable long id,
+            @RequestBody UserDto userDto
+            ) {
+        try {
+            userDto.setRole("ROLE_USER");
+            UserDto updated = userService.updateUser(id, userDto);
+            return new ResponseEntity<>(updated, HttpStatus.OK);
+        }catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/propertyOwner/{id}")
+    public ResponseEntity<?> updatePropertyOwner(
+            @PathVariable long id,
+            @RequestBody UserDto userDto
+
+    ) {
+        try {
+            userDto.setRole("ROLE_OWNER");
+            UserDto updated = userService.updateUser(id, userDto);
+            return new ResponseEntity<>(updated, HttpStatus.OK);
+        }catch (IllegalArgumentException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUser(
+            @RequestParam Long id
+    ){
+        userService.deleteUser(id);
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
+    }
+
+
     //http://localhost:8080/api/v1/users/login
     @PostMapping("/login")
     public ResponseEntity<?> login(

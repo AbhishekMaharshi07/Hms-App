@@ -5,6 +5,7 @@ import com.hms.entity.Country;
 import com.hms.entity.Location;
 import com.hms.entity.Property;
 import com.hms.payloads.PropertyDto;
+import com.hms.payloads.UserDto;
 import com.hms.repository.CityRepository;
 import com.hms.repository.CountryRepository;
 import com.hms.repository.LocationRepository;
@@ -34,14 +35,18 @@ public class PropertyService {
         this.locationRepository = locationRepository;
     }
 
-    public ResponseEntity<?> addProperty(
-            PropertyDto propertyDto, Long location_id, Long country_id,Long city_id) {
+    public PropertyDto addProperty(
+            PropertyDto propertyDto, long locationId, long cityId, long countryId) {
 
-        Location location = locationRepository.findById(location_id).orElseThrow(
-                () -> new RuntimeException("Services is not available for your country"));
-        City city = cityRepository.findById(city_id).orElseThrow(
-                () -> new RuntimeException("Services is not available for your country"));
-        Country country = countryRepository.findById(country_id).orElseThrow(
+        Optional<Property> byName = propertyRepository.findByName(propertyDto.getName());
+        if (byName.isPresent()) {
+            throw new IllegalArgumentException("property already exists");
+        }
+        Location location = locationRepository.findById(locationId).orElseThrow(
+                () -> new RuntimeException("Services is not available for your location"));
+        City city = cityRepository.findById(cityId).orElseThrow(
+                () -> new RuntimeException("Services is not available for your city"));
+        Country country = countryRepository.findById(countryId).orElseThrow(
                 () -> new RuntimeException("Services is not available for your country"));
 
 
@@ -52,12 +57,12 @@ public class PropertyService {
 
         Property save = propertyRepository.save(property);
         PropertyDto dto = mapToDto(save);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return dto;
     }
 
 
     Property mapToEntity(PropertyDto propertyDto) {
-        Property mapProperty= modelMapper.map(propertyDto, Property.class);
+        Property mapProperty = modelMapper.map(propertyDto, Property.class);
         return mapProperty;
     }
 
@@ -73,7 +78,7 @@ public class PropertyService {
 
     public void deletePropertyById(long property_id) {
         propertyRepository.deleteById(property_id);
-        }
+    }
 
     public Optional<Property> getPropertyById(long propertyId) {
         Optional<Property> byId = propertyRepository.findById(propertyId);
@@ -82,15 +87,15 @@ public class PropertyService {
 
     public boolean updatePropertyById(long property_id, PropertyDto propertyDto) {
         Property property = propertyRepository.findById(property_id).orElseThrow(
-                ()-> new RuntimeException("Property not found")
+                () -> new RuntimeException("Property not found")
         );
 
         Country country = countryRepository.findById(propertyDto.getCountry_id()).orElseThrow(
-                ()-> new RuntimeException("Country not found")
+                () -> new RuntimeException("Country not found")
         );
 
-        City city =  cityRepository.findById(propertyDto.getCity_id()).orElseThrow(
-                ()-> new RuntimeException("city not found")
+        City city = cityRepository.findById(propertyDto.getCity_id()).orElseThrow(
+                () -> new RuntimeException("city not found")
         );
 
         property.setName(propertyDto.getName());
