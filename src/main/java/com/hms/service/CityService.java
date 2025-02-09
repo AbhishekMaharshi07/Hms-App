@@ -46,6 +46,7 @@ public class CityService {
             City city1 = city.get();
             city1.setName(cityDto.getName());
             cityRepository.save(city1);
+            System.out.println("Hello world");
             return true;
         }else {
             return false;
